@@ -58,7 +58,7 @@ async function showStations(url) {
                     <li>Lufttemperatur (LT): ${properties.LT || "keine Daten"} °C</li>
                     <li>Relative Luftfeuchte (RH): ${properties.RH || "keine Daten"} %</li>
                     <li>Windgeschwindigkeit (WG): ${properties.WG || "keine Daten"} km/h</li>
-                    <li>Schneehöhe (HS): ${properties.HS || "keine Daten"} cm</li>
+                    <li>Schneehöhe (HS): ${properties.HS || "keine Daten"} cm</li>               
                 </ul>`;
 //feature.geometry.coordinates[2] ruft den dritten Wert aus dem "coordinates"-Array des "geometry"-Objekts ab -> Seehöhe
             layer.bindPopup(popupContent);
@@ -68,4 +68,3 @@ async function showStations(url) {
 }
 
 showStations("https://static.avalanche.report/weather_stations/stations.geojson");
-
