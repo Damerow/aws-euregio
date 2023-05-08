@@ -39,6 +39,7 @@ async function showStations(url) {
     let jsondata = await response.json();
 
     // Wetterstationen mit Icons implementieren
+    console.log(jsondata);
     L.geoJSON(jsondata, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, {
@@ -51,20 +52,20 @@ async function showStations(url) {
         },
         onEachFeature: function (feature, layer) {
             let properties = feature.properties;
-            c
-            let popupContent = `
-                <h3>${properties.name}</h3>
+            let popupContent = `   
+            <h3>${properties.name} (${feature.geometry.coordinates[2]} m ü. Adria) </h3> 
                 <ul>
-                    <li>Seehöhe: ${properties.SEEHOEHE} m</li>
-                    <li>Lufttemperatur (LT): ${properties.lt} °C</li>
-                    <li>Relative Luftfeuchte (RH): ${properties.rh} %</li>
-                    <li>Windgeschwindigkeit (WG): ${properties.wg} km/h</li>
-                    <li>Schneehöhe (HS): ${properties.hs} cm</li>
+                    <li>Lufttemperatur (LT): ${properties.LT} °C</li>
+                    <li>Relative Luftfeuchte (RH): ${properties.RH} %</li>
+                    <li>Windgeschwindigkeit (WG): ${properties.WG} km/h</li>
+                    <li>Schneehöhe (HS): ${properties.GS_O} cm</li>
                 </ul>`;
-    
+//feature.geometry.coordinates[2] ruft den dritten Wert aus dem "coordinates"-Array des "geometry"-Objekts ab -> Seehöhe
             layer.bindPopup(popupContent);
         }
+
     }).addTo(themaLayer.stations);
 }
 
 showStations("https://static.avalanche.report/weather_stations/stations.geojson");
+
