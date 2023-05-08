@@ -55,10 +55,10 @@ async function showStations(url) {
             let popupContent = `   
             <h3>${properties.name} (${feature.geometry.coordinates[2]} m ü. Adria) </h3> 
                 <ul>
-                    <li>Lufttemperatur (LT): ${properties.LT} °C</li>
-                    <li>Relative Luftfeuchte (RH): ${properties.RH} %</li>
-                    <li>Windgeschwindigkeit (WG): ${properties.WG} km/h</li>
-                    <li>Schneehöhe (HS): ${properties.GS_O} cm</li>
+                    <li>Lufttemperatur (LT): ${properties.LT || "keine Daten"} °C</li>
+                    <li>Relative Luftfeuchte (RH): ${properties.RH || "keine Daten"} %</li>
+                    <li>Windgeschwindigkeit (WG): ${properties.WG || "keine Daten"} km/h</li>
+                    <li>Schneehöhe (HS): ${properties.HS || "keine Daten"} cm</li>
                 </ul>`;
 //feature.geometry.coordinates[2] ruft den dritten Wert aus dem "coordinates"-Array des "geometry"-Objekts ab -> Seehöhe
             layer.bindPopup(popupContent);
