@@ -9,7 +9,7 @@ let ibk = {
 // Karte initialisieren
 let map = L.map("map", {
     fullscreenControl: true,
-    maxZoom: 12, 
+    maxZoom: 12,
 }).setView([ibk.lat, ibk.lng], 11);
 
 // thematische Layer
@@ -54,18 +54,21 @@ async function showStations(url) {
         },
         onEachFeature: function (feature, layer) {
             let properties = feature.properties;
+            let pointInTime = new Date(properties.date);
+            let WG = (properties.WG) ? (properties.WG * 3.6).toFixed(1) : "-";
             let popupContent = `   
-            <h3>${properties.name} (${feature.geometry.coordinates[2]} m ü. Adria) </h3> 
+                       <h3>${properties.name} (${feature.geometry.coordinates[2]} m ü. Adria) </h3> 
                 <ul>
                     <li>Lufttemperatur (LT): ${properties.LT || "keine Daten"} °C</li>
                     <li>Relative Luftfeuchte (RH): ${properties.RH || "keine Daten"} %</li>
-                    <li>Windgeschwindigkeit (WG): ${properties.WG *3.6 || "keine Daten"} km/h</li>
-                    <li>Schneehöhe (HS): ${properties.HS || "keine Daten"} cm</li>               
-                </ul>`;
-//feature.geometry.coordinates[2] ruft den dritten Wert aus dem "coordinates"-Array des "geometry"-Objekts ab -> Seehöhe
+                    <li>Windgeschwindigkeit (WG): ${WG} km/h</li>
+                    <li>Schneehöhe (HS): ${properties.HS || "keine Daten"} cm</li>           
+                </ul>
+                <span>${pointInTime.toLocaleString()}</span>
+                `;
+            //feature.geometry.coordinates[2] ruft den dritten Wert aus dem "coordinates"-Array des "geometry"-Objekts ab -> Seehöhe
             layer.bindPopup(popupContent);
         }
-
     }).addTo(themaLayer.stations);
 }
 
