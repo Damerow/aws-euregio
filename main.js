@@ -14,7 +14,8 @@ let map = L.map("map", {
 
 // thematische Layer
 let themaLayer = {
-    stations: L.featureGroup()
+    stations: L.featureGroup(),
+    temperature: L.featureGroup(),
 }
 
 // Hintergrundlayer
@@ -28,7 +29,8 @@ let layerControl = L.control.layers({
     "Esri WorldTopoMap": L.tileLayer.provider("Esri.WorldTopoMap"),
     "Esri WorldImagery": L.tileLayer.provider("Esri.WorldImagery")
 }, {
-    "Wetterstationen": themaLayer.stations.addTo(map)
+    "Wetterstationen": themaLayer.stations.addTo(map),
+    "Temperatur": themaLayer.temperature.addTo(map),
 }).addTo(map);
 
 // Maßstab
@@ -36,43 +38,48 @@ L.control.scale({
     imperial: false,
 }).addTo(map);
 
-async function showStations(url) {
+function writeStationLayer() {
+// Wetterstationen
+        L.geoJSON(jsondata, {
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {
+                    icon: L.icon({
+                        iconUrl: 'icons/icons.png',
+                        iconAnchor: [16, 37],
+                        popupAnchor: [0, -37]
+                    })
+                });
+            },
+            onEachFeature: function (feature, layer) {
+                let properties = feature.properties;
+                let pointInTime = new Date(properties.date);
+                let WG = (properties.WG) ? (properties.WG * 3.6).toFixed(1) : "-";
+                let popupContent = `   
+                           <h3>${properties.name} (${feature.geometry.coordinates[2]} m ü. Adria) </h3> 
+                    <ul>
+                        <li>Lufttemperatur (LT): ${properties.LT || "keine Daten"} °C</li>
+                        <li>Relative Luftfeuchte (RH): ${properties.RH || "keine Daten"} %</li>
+                        <li>Windgeschwindigkeit (WG): ${WG} km/h</li>
+                        <li>Schneehöhe (HS): ${properties.HS || "keine Daten"} cm</li>           
+                    </ul>
+                    <span>${pointInTime.toLocaleString()}</span>
+                    `;
+                //feature.geometry.coordinates[2] ruft den dritten Wert aus dem "coordinates"-Array des "geometry"-Objekts ab -> Seehöhe
+                layer.bindPopup(popupContent);
+            }
+        }).addTo(themaLayer.stations);
+    }
+
+
+async function loadStations(url) {
     let response = await fetch(url);
     let jsondata = await response.json();
 
     // Wetterstationen mit Icons implementieren
     console.log(jsondata);
-    L.geoJSON(jsondata, {
-        pointToLayer: function (feature, latlng) {
-            return L.marker(latlng, {
-                icon: L.icon({
-                    iconUrl: 'icons/icons.png',
-                    iconAnchor: [16, 37],
-                    popupAnchor: [0, -37]
-                })
-            });
-        },
-        onEachFeature: function (feature, layer) {
-            let properties = feature.properties;
-            let pointInTime = new Date(properties.date);
-            let WG = (properties.WG) ? (properties.WG * 3.6).toFixed(1) : "-";
-            let popupContent = `   
-                       <h3>${properties.name} (${feature.geometry.coordinates[2]} m ü. Adria) </h3> 
-                <ul>
-                    <li>Lufttemperatur (LT): ${properties.LT || "keine Daten"} °C</li>
-                    <li>Relative Luftfeuchte (RH): ${properties.RH || "keine Daten"} %</li>
-                    <li>Windgeschwindigkeit (WG): ${WG} km/h</li>
-                    <li>Schneehöhe (HS): ${properties.HS || "keine Daten"} cm</li>           
-                </ul>
-                <span>${pointInTime.toLocaleString()}</span>
-                `;
-            //feature.geometry.coordinates[2] ruft den dritten Wert aus dem "coordinates"-Array des "geometry"-Objekts ab -> Seehöhe
-            layer.bindPopup(popupContent);
-        }
-    }).addTo(themaLayer.stations);
 }
 
-showStations("https://static.avalanche.report/weather_stations/stations.geojson");
+loadStations("https://static.avalanche.report/weather_stations/stations.geojson");
 
 //if(prop.WG){
 // return (prop.WG *3.6).toFixed(1);
