@@ -16,6 +16,7 @@ let map = L.map("map", {
 let themaLayer = {
     stations: L.featureGroup(),
     temperature: L.featureGroup(),
+    wind: L.featureGroup(),
 }
 
 // Hintergrundlayer
@@ -31,6 +32,7 @@ let layerControl = L.control.layers({
 }, {
     "Wetterstationen": themaLayer.stations,
     "Temperatur": themaLayer.temperature.addTo(map),
+    "Wind": themaLayer.wind.addTo(map),
 }).addTo(map);
 
 // Maßstab
@@ -66,7 +68,7 @@ function writeStationLayer(jsondata) {
         onEachFeature: function (feature, layer) {
             let properties = feature.properties;
             let pointInTime = new Date(properties.date);
-            let WG = (properties.WG) ? (properties.WG * 3.6).toFixed(1) : "-";
+            let WG = (properties.WG) ? (properties.WG).toFixed(1) : "-";
             let popupContent = `   
                            <h3>${properties.name} (${feature.geometry.coordinates[2]} m ü. Adria) </h3> 
                     <ul>
@@ -85,7 +87,7 @@ function writeStationLayer(jsondata) {
 
 function writeTemperatureLayer(jsondata) {
     L.geoJSON(jsondata, {
-        filter: function(feature) {
+        filter: function (feature) {
             if (feature.properties.LT > -50 && feature.properties.LT < 50) {
                 return true;
             }
@@ -102,17 +104,34 @@ function writeTemperatureLayer(jsondata) {
     }).addTo(themaLayer.temperature);
 }
 
+function writeWindLayer(jsondata) {
+    L.geoJSON(jsondata, {
+        filter: function (feature) {
+            if (feature.properties.WG > 0 && feature.properties.WG < 200) {
+                return true;
+            }
+        },
+        pointToLayer: function (feature, latlng) {
+            let color = getColor(feature.properties.WG, COLORS.wind);
+            let windKmh = feature.properties.WG//Umrechnung von m pro s in kmh 
+            return L.marker(latlng, {
+                icon: L.divIcon({   
+                    className: "aws-div-icon",
+                    html: `<span style="background-color:${color}">${windKmh.toFixed(1)}</span>`
+                })
+            });
+        },
+    }).addTo(themaLayer.wind);
+}
+
 //
 async function loadStations(url) {
     let response = await fetch(url);
     let jsondata = await response.json();
     writeStationLayer(jsondata);
     writeTemperatureLayer(jsondata);
+    writeWindLayer(jsondata);
+    //call funttion for windLayer
 }
 loadStations("https://static.avalanche.report/weather_stations/stations.geojson");
 
-//if(prop.WG){
-// return (prop.WG *3.6).toFixed(1);
-// } else {
-//   return "-";
-//     }
