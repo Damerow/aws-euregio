@@ -38,8 +38,8 @@ L.control.scale({
     imperial: false,
 }).addTo(map);
 
-function writeStationLayer() {
-// Wetterstationen
+function writeStationLayer(jsondata) {
+// Wetterstationen mit Icons und Popups implementieren
         L.geoJSON(jsondata, {
             pointToLayer: function (feature, latlng) {
                 return L.marker(latlng, {
@@ -70,15 +70,12 @@ function writeStationLayer() {
         }).addTo(themaLayer.stations);
     }
 
-
+//
 async function loadStations(url) {
     let response = await fetch(url);
     let jsondata = await response.json();
-
-    // Wetterstationen mit Icons implementieren
-    console.log(jsondata);
+    writeStationLayer(jsondata);
 }
-
 loadStations("https://static.avalanche.report/weather_stations/stations.geojson");
 
 //if(prop.WG){
