@@ -8,7 +8,8 @@ let ibk = {
 
 // Karte initialisieren
 let map = L.map("map", {
-    fullscreenControl: true
+    fullscreenControl: true,
+    maxZoom: 12, 
 }).setView([ibk.lat, ibk.lng], 11);
 
 // thematische Layer
@@ -20,7 +21,8 @@ let themaLayer = {
 let layerControl = L.control.layers({
     "Relief avalanche.report": L.tileLayer(
         "https://static.avalanche.report/tms/{z}/{x}/{y}.webp", {
-        attribution: `© <a href="https://lawinen.report">CC BY avalanche.report</a>`
+        attribution: `© <a href="https://lawinen.report">CC BY avalanche.report</a>`,
+        maxZoom: 12,
     }).addTo(map),
     "Openstreetmap": L.tileLayer.provider("OpenStreetMap.Mapnik"),
     "Esri WorldTopoMap": L.tileLayer.provider("Esri.WorldTopoMap"),
@@ -57,7 +59,7 @@ async function showStations(url) {
                 <ul>
                     <li>Lufttemperatur (LT): ${properties.LT || "keine Daten"} °C</li>
                     <li>Relative Luftfeuchte (RH): ${properties.RH || "keine Daten"} %</li>
-                    <li>Windgeschwindigkeit (WG): ${properties.WG || "keine Daten"} km/h</li>
+                    <li>Windgeschwindigkeit (WG): ${properties.WG *3.6 || "keine Daten"} km/h</li>
                     <li>Schneehöhe (HS): ${properties.HS || "keine Daten"} cm</li>               
                 </ul>`;
 //feature.geometry.coordinates[2] ruft den dritten Wert aus dem "coordinates"-Array des "geometry"-Objekts ab -> Seehöhe
@@ -68,3 +70,9 @@ async function showStations(url) {
 }
 
 showStations("https://static.avalanche.report/weather_stations/stations.geojson");
+
+//if(prop.WG){
+// return (prop.WG *3.6).toFixed(1);
+// } else {
+//   return "-";
+//     }
