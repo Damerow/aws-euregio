@@ -56,9 +56,11 @@ footer nav {
     font-weight: bold;
     padding: 0.3em;
     border: 1px solid silver;
-    text-shadow: /* kleiner Rand um die Zahlen für dunkle Hintergründe
+    text-shadow: /* kleiner Rand um die Zahlen für dunkle Hintergründe */
         -1px -1px 0 white,
         -1px 1px 0 white,
         1px -1px 0 white,
         1px 1px 0 white;
 }
+
+
