@@ -17,7 +17,7 @@ let themaLayer = {
     stations: L.featureGroup(),
     temperature: L.featureGroup(),
     wind: L.featureGroup(),
-    schneehöhe: L.featureGroup(),
+    schneehoehe: L.featureGroup(),
 }
 
 // Hintergrundlayer
@@ -32,9 +32,9 @@ let layerControl = L.control.layers({
     "Esri WorldImagery": L.tileLayer.provider("Esri.WorldImagery")
 }, {
     "Wetterstationen": themaLayer.stations,
-    "Temperatur": themaLayer.temperature.addTo(map),
+    "Temperatur": themaLayer.temperature,
     "Wind": themaLayer.wind,
-    "Schneehöhe": themaLayer.schneehöhe,
+    "Schneehöhe": themaLayer.schneehoehe.addTo(map),
 }).addTo(map);
 
 // Maßstab
@@ -115,9 +115,9 @@ function writeWindLayer(jsondata) {
         },
         pointToLayer: function (feature, latlng) {
             let color = getColor(feature.properties.WG, COLORS.wind);
-            let windKmh = feature.properties.WG//Umrechnung von m pro s in kmh 
+            let windKmh = feature.properties.WG   //Umrechnung von m pro s in kmh mit * 3,6
             return L.marker(latlng, {
-                icon: L.divIcon({   
+                icon: L.divIcon({
                     className: "aws-div-icon",
                     html: `<span style="background-color:${color}">${windKmh.toFixed(1)}</span>`
                 })
@@ -126,14 +126,46 @@ function writeWindLayer(jsondata) {
     }).addTo(themaLayer.wind);
 }
 
-//
+function writeSchneehoeheLayer(jsondata) {
+    L.geoJSON(jsondata, {
+        filter: function (feature) {
+            if (feature.properties.HS > 1 && feature.properties.HS < 999) {
+                return true;
+            }
+        },
+        pointToLayer: function (feature, latlng) {
+            let color = getColor(feature.properties.HS, COLORS.Schneehoehe);
+            let snowHS = feature.properties.HS
+            return L.marker(latlng, {
+                icon: L.divIcon({
+                    className: "aws-div-icon",
+                    html: `<span style="background-color:${color}">${snowHS.toFixed(1)}</span>`
+                })
+            });
+        },
+    }).addTo(themaLayer.schneehoehe);
+}
+
 async function loadStations(url) {
     let response = await fetch(url);
     let jsondata = await response.json();
     writeStationLayer(jsondata);
     writeTemperatureLayer(jsondata);
     writeWindLayer(jsondata);
-    //call funttion for windLayer
+    writeSchneehoeheLayer(jsondata);
+    //call function for Layer
 }
 loadStations("https://static.avalanche.report/weather_stations/stations.geojson");
+
+    // Change default options
+    L.control.rainviewer({ 
+        position: 'bottomleft',
+        nextButtonText: '>',
+        playStopButtonText: 'Play/Stop',
+        prevButtonText: '<',
+        positionSliderLabelText: "Hour:",
+        opacitySliderLabelText: "Opacity:",
+        animationInterval: 500,
+        opacity: 0.5
+    }).addTo(map);
 
